@@ -238,7 +238,7 @@ def _handle_qdrant_doc_search(args: dict, **kwargs) -> str:
         from tools.qdrant_memory import get_embedding, QDRANT_URL
         from qdrant_client import QdrantClient
 
-        client = QdrantClient(url=QDRANT_URL, timeout=10)
+        client = QdrantClient(url=QDRANT_URL, prefer_grpc=True, grpc_port=6334, timeout=10)
         vector = get_embedding(query)
 
         response = client.query_points(

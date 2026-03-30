@@ -70,7 +70,7 @@ class QdrantMemoryStore:
     """
 
     def __init__(self) -> None:
-        self.client = QdrantClient(url=QDRANT_URL, timeout=10)
+        self.client = QdrantClient(url=QDRANT_URL, prefer_grpc=True, grpc_port=6334, timeout=10)
         ensure_collection(self.client, MEMORY_COLLECTION)
 
     def upsert(self, text: str, metadata: Optional[dict] = None) -> str:

@@ -42,7 +42,7 @@ jobs:
 
       - name: Check Docker Hub credentials
         id: docker-creds
-        if: github.event_name == push && github.ref == refs/heads/main
+        if: github.event_name == 'push' && github.ref == 'refs/heads/main'
         run: |
           if [ -n "$DOCKERHUB_USERNAME" ] && [ -n "$DOCKERHUB_TOKEN" ]; then
             echo "available=true" >> "$GITHUB_OUTPUT"
@@ -54,14 +54,14 @@ jobs:
           DOCKERHUB_TOKEN: ${{ secrets.DOCKERHUB_TOKEN }}
 
       - name: Log in to Docker Hub
-        if: github.event_name == push && github.ref == refs/heads/main && steps.docker-creds.outputs.available == true
+        if: github.event_name == 'push' && github.ref == 'refs/heads/main' && steps.docker-creds.outputs.available == 'true'
         uses: docker/login-action@v3
         with:
           username: ${{ secrets.DOCKERHUB_USERNAME }}
           password: ${{ secrets.DOCKERHUB_TOKEN }}
 
       - name: Push image
-        if: github.event_name == push && github.ref == refs/heads/main && steps.docker-creds.outputs.available == true
+        if: github.event_name == 'push' && github.ref == 'refs/heads/main' && steps.docker-creds.outputs.available == 'true'
         uses: docker/build-push-action@v6
         with:
           context: .

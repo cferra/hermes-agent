@@ -30,6 +30,11 @@ class TestHookRegistryInit:
 
 
 class TestDiscoverAndLoad:
+    @pytest.fixture(autouse=True)
+    def no_builtins(self, monkeypatch):
+        """Isolate discovery tests from builtin hooks (e.g. boot-md)."""
+        monkeypatch.setattr(HookRegistry, "_register_builtin_hooks", lambda self: None)
+
     def test_loads_valid_hook(self, tmp_path):
         _create_hook(tmp_path, "my-hook", '["agent:start"]',
                       "def handle(event_type, context):\n    pass\n")

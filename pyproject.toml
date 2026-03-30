@@ -35,6 +35,7 @@ dependencies = [
   "faster-whisper>=1.0.0,<2",
   # Skills Hub (GitHub App JWT auth — optional, only needed for bot identity)
   "PyJWT[crypto]>=2.12.0,<3",  # CVE-2026-32597
+  "qdrant-client>=1.17.1",
 ]
 
 [project.optional-dependencies]

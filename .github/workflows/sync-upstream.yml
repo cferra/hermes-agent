@@ -1,0 +1,43 @@
+name: Sync Upstream
+
+on:
+  schedule:
+    - cron: "0 2 * * *"   # daily at 02:00 UTC (10 PM ET)
+  workflow_dispatch:        # allow manual trigger
+
+jobs:
+  sync:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout fork
+        uses: actions/checkout@v4
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+          fetch-depth: 0
+
+      - name: Configure git
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+
+      - name: Add upstream remote
+        run: git remote add upstream https://github.com/NousResearch/hermes-agent.git
+
+      - name: Fetch upstream
+        run: git fetch upstream main
+
+      - name: Check if behind
+        id: check
+        run: |
+          BEHIND=$(git rev-list --count HEAD..upstream/main)
+          echo "behind=$BEHIND" >> "$GITHUB_OUTPUT"
+          echo "Fork is $BEHIND commit(s) behind upstream"
+
+      - name: Merge upstream (prefer ours on conflict)
+        if: steps.check.outputs.behind != '0'
+        run: |
+          git merge upstream/main -X ours --no-edit             -m "chore: sync upstream $(date +%Y-%m-%d)"
+
+      - name: Push to fork
+        if: steps.check.outputs.behind != '0'
+        run: git push origin main

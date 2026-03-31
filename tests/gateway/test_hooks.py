@@ -29,6 +29,11 @@ class TestHookRegistryInit:
         assert reg._handlers == {}
 
 
+def _patch_no_builtins(reg):
+    """Suppress built-in hook registration so tests only exercise user-hook discovery."""
+    return patch.object(reg, "_register_builtin_hooks")
+
+
 class TestDiscoverAndLoad:
     @pytest.fixture(autouse=True)
     def no_builtins(self, monkeypatch):
@@ -40,7 +45,7 @@ class TestDiscoverAndLoad:
                       "def handle(event_type, context):\n    pass\n")
 
         reg = HookRegistry()
-        with patch("gateway.hooks.HOOKS_DIR", tmp_path):
+        with patch("gateway.hooks.HOOKS_DIR", tmp_path), _patch_no_builtins(reg):
             reg.discover_and_load()
 
         assert len(reg.loaded_hooks) == 1
@@ -53,7 +58,7 @@ class TestDiscoverAndLoad:
         (hook_dir / "handler.py").write_text("def handle(e, c): pass\n")
 
         reg = HookRegistry()
-        with patch("gateway.hooks.HOOKS_DIR", tmp_path):
+        with patch("gateway.hooks.HOOKS_DIR", tmp_path), _patch_no_builtins(reg):
             reg.discover_and_load()
 
         assert len(reg.loaded_hooks) == 0
@@ -64,7 +69,7 @@ class TestDiscoverAndLoad:
         (hook_dir / "HOOK.yaml").write_text("name: bad\nevents: ['agent:start']\n")
 
         reg = HookRegistry()
-        with patch("gateway.hooks.HOOKS_DIR", tmp_path):
+        with patch("gateway.hooks.HOOKS_DIR", tmp_path), _patch_no_builtins(reg):
             reg.discover_and_load()
 
         assert len(reg.loaded_hooks) == 0
@@ -76,7 +81,7 @@ class TestDiscoverAndLoad:
         (hook_dir / "handler.py").write_text("def handle(e, c): pass\n")
 
         reg = HookRegistry()
-        with patch("gateway.hooks.HOOKS_DIR", tmp_path):
+        with patch("gateway.hooks.HOOKS_DIR", tmp_path), _patch_no_builtins(reg):
             reg.discover_and_load()
 
         assert len(reg.loaded_hooks) == 0
@@ -88,14 +93,14 @@ class TestDiscoverAndLoad:
         (hook_dir / "handler.py").write_text("def something_else(): pass\n")
 
         reg = HookRegistry()
-        with patch("gateway.hooks.HOOKS_DIR", tmp_path):
+        with patch("gateway.hooks.HOOKS_DIR", tmp_path), _patch_no_builtins(reg):
             reg.discover_and_load()
 
         assert len(reg.loaded_hooks) == 0
 
     def test_nonexistent_hooks_dir(self, tmp_path):
         reg = HookRegistry()
-        with patch("gateway.hooks.HOOKS_DIR", tmp_path / "nonexistent"):
+        with patch("gateway.hooks.HOOKS_DIR", tmp_path / "nonexistent"), _patch_no_builtins(reg):
             reg.discover_and_load()
 
         assert len(reg.loaded_hooks) == 0
@@ -107,7 +112,7 @@ class TestDiscoverAndLoad:
                       "def handle(e, c): pass\n")
 
         reg = HookRegistry()
-        with patch("gateway.hooks.HOOKS_DIR", tmp_path):
+        with patch("gateway.hooks.HOOKS_DIR", tmp_path), _patch_no_builtins(reg):
             reg.discover_and_load()
 
         assert len(reg.loaded_hooks) == 2

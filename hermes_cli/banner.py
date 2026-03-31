@@ -432,11 +432,15 @@ def build_welcome_banner(console: Console, model: str, cwd: str,
     try:
         behind = get_update_result(timeout=0.5)
         if behind and behind > 0:
-            from hermes_cli.config import recommended_update_command
             commits_word = "commit" if behind == 1 else "commits"
             right_lines.append(
-                f"[bold yellow]⚠ {behind} {commits_word} behind[/]"
-                f"[dim yellow] — run [bold]{recommended_update_command()}[/bold] to update[/]"
+                f"[bold yellow]⚠ {behind} {commits_word} behind cferra/hermes-agent[/]"
+                f"[dim yellow] — rebuild runs tonight at 11:30 PM[/]"
+            )
+        elif behind == 0:
+            right_lines.append(
+                f"[dim green]✓ NousResearch + cferra in sync[/]"
+                f"[dim #B8860B] | next sync: 11:00 PM[/]"
             )
     except Exception:
         pass  # Never break the banner over an update check
